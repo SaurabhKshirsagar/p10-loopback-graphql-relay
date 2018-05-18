@@ -10,56 +10,56 @@ module.exports = function(app) {
   router.get('/', (req, res, next) => {
     app.models.Customer.findOne({
       where: {
-        name: 'Customer A'
-      }
+        name: 'Customer A',
+      },
     }, (err, customer) => {
       if (err) {
         return next(err);
       }
       return res.render('index', {
-        customer
+        customer,
       });
     });
   });
   router.get('/email', (req, res, next) => {
     app.models.Customer.findOne({
       where: {
-        name: 'Larry Smith'
-      }
+        name: 'Larry Smith',
+      },
     }, (err, customer) => {
       if (err) {
         return next(err);
       }
       return res.render('email', {
-        customer
+        customer,
       });
     });
   });
   router.get('/address', (req, res, next) => {
     app.models.Customer.findOne({
       where: {
-        name: 'John Smith'
-      }
+        name: 'John Smith',
+      },
     }, (err, customer) => {
       if (err) {
         return next(err);
       }
       return res.render('address', {
-        customer
+        customer,
       });
     });
   });
   router.get('/account', (req, res, next) => {
     app.models.Customer.findOne({
       where: {
-        name: 'Mary Smith'
-      }
+        name: 'Mary Smith',
+      },
     }, (err, customer) => {
       if (err) {
         return next(err);
       }
       return res.render('account', {
-        customer
+        customer,
       });
     });
   });

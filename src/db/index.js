@@ -14,9 +14,9 @@ function getFirst(model, obj, args) {
 
   return model.findOne({
     order: idName + (args.before ? ' DESC' : ' ASC'),
-    where: args.where
+    where: args.where,
   })
-  .then(res => (res || {}));
+    .then(res => (res || {}));
 }
 
 function findOne(model, obj, args, context) {
@@ -42,7 +42,7 @@ function findAll(model, obj, args, context) {
     })
     .then((first) => {
       response.first = first;
-      return getList(model, obj, Object.assign({}, args, { count: response.count }));
+      return getList(model, obj, Object.assign({}, args, {count: response.count}));
     })
     .then((list) => {
       response.list = list;
@@ -69,22 +69,20 @@ function findAllRelated(model, obj, method, args, context) {
         const idName = (model.getIdName && model.getIdName()) ? model.getIdName() : 'id';
         obj[`__findOne__${method}`]({
           order: idName + (args.before ? ' DESC' : ' ASC'),
-          where: args.where
+          where: args.where,
         }, callback);
       },
       function(first, callback) {
         response.first = first;
-        obj[`__get__${method}`](buildFilter(model, Object.assign({}, args, { count: response.count })), callback);
-      }
+        obj[`__get__${method}`](buildFilter(model, Object.assign({}, args, {count: response.count})), callback);
+      },
     ], (err, list) => {
-
       if (err) {
         return reject(err);
       }
       response.list = list;
       return resolve(response);
     });
-
   });
 }
 
@@ -107,22 +105,20 @@ function findAllViaThrough(rel, obj, args, context) {
         const idName = (rel.modelTo.getIdName && rel.modelTo.getIdName()) ? rel.modelTo.getIdName() : 'id';
         obj[`__findOne__${rel.name}`]({
           order: idName + (args.before ? ' DESC' : ' ASC'),
-          where: args.where
+          where: args.where,
         }, callback);
       },
       function(first, callback) {
         response.first = first;
-        obj[`__get__${rel.name}`](buildFilter(rel.modelTo, Object.assign({}, args, { count: response.count })), callback);
-      }
+        obj[`__get__${rel.name}`](buildFilter(rel.modelTo, Object.assign({}, args, {count: response.count})), callback);
+      },
     ], (err, list) => {
-
       if (err) {
         return reject(err);
       }
       response.list = list;
       return resolve(response);
     });
-
   });
 }
 
@@ -147,7 +143,7 @@ function findRelatedOne(rel, obj, args, context) {
     return Promise.resolve([]);
   }
   args = {
-    [rel.keyTo]: obj[rel.keyFrom]
+    [rel.keyTo]: obj[rel.keyFrom],
   };
   return findOne(rel.modelTo, null, args, context);
 }
@@ -157,5 +153,5 @@ module.exports = {
   findOne,
   findRelatedMany,
   findRelatedOne,
-  findAllRelated
+  findAllRelated,
 };

@@ -1,53 +1,60 @@
-const PubSub = require('./pubsub');
-const SubscriptionManager = require('./subscriptionManager');
-const RedisPubSub = require('./redis-pubsub').RedisPubSub;
-const SubscriptionServer = require('./server');
+'use strict';
 
-// start a subscription (for testing)
-// function test(subscriptionManager) {
-//   subscriptionManager.subscribe({
-//     query: `
-//       subscription AuthorSubscription(
-//         $options: JSON
-//         $create: Boolean
-//         $update: Boolean
-//         $remove: Boolean
-//       ) {
-//         Author(input: {
-//           options: $options
-//           create: $create
-//           update: $update
-//           remove: $remove
-//           clientSubscriptionId: 85
-//         }) {
-//           author {
-//             id first_name last_name
-//           }
-//           where type target clientSubscriptionId
-//         }
-//       }
-//     `,
-//     variables: {
-//       options: {},
-//       create: true,
-//       update: true,
-//       remove: true,
-//     },
-//     context: {},
-//     callback: (err, data) => {
-//       console.log('subs output', data);
-//     },
-//   }).catch(err => console.log(`An error occured: ${err}`));
-// }
+const {createServer} = require('http');
+const {SubscriptionServer} = require('subscriptions-transport-ws');
+const {execute, subscribe} = require('graphql');
+const bodyParser = require('body-parser');
+const {graphqlExpress, graphiqlExpress} = require('apollo-server-express');
 
-module.exports = function startSubscriptionServer(app, schema, options) {
-  const models = app.models();
-  const pubsub = (process.env.NODE_ENV && process.env.NODE_ENV.toLocaleLowerCase() === 'production')?
-   new RedisPubSub({  host: options.redis.host,
-    port: options.redis.port
-  }):new PubSub();
-  const subscriptionManager = SubscriptionManager(models, schema, pubsub);
-  SubscriptionServer(app, subscriptionManager, options);
+module.exports = function(app, schema, opts) {
+  const PORT = 3000;
 
-  // test(subscriptionManager);
+  app.use('/graphiql', graphiqlExpress({
+    endpointURL: '/graphql',
+    subscriptionsEndpoint: `ws://localhost:${PORT}/subscriptions`,
+  }));
+
+  app.use('/graphql', bodyParser.json(), graphqlExpress(req => ({
+    schema,
+    rootValue: global,
+    graphiql: false,
+    context: {
+      app,
+      req,
+    },
+  })));
+
+  const server = createServer(app);
+  server.listen(PORT, () => {
+    SubscriptionServer.create(
+      {execute, subscribe, schema},
+      {server, path: '/subscriptions'}
+    );
+    console.log(`GraphQL server running on port ${PORT}.`);
+  });
+
+  const subscriptionOpts = opts.subscriptionServer || {};
+
+  const disable = subscriptionOpts.disable || false;
+
+  if (disable === true) {
+    return;
+  }
+
+  const WS_PORT = subscriptionOpts.port || 5000;
+  const options = subscriptionOpts.options || {};
+  const socketOptions = subscriptionOpts.socketOptions || {};
+
+  const websocketServer = createServer((request, response) => {
+    response.writeHead(404);
+    response.end();
+  });
+
+  websocketServer.listen(WS_PORT, () => console.log(
+    `Websocket Server is now running on http://localhost:${WS_PORT}`
+  ));
+
+  SubscriptionServer.create({schema, execute, subscribe}, {server: websocketServer, path: '/'});
+
+  return server;
 };

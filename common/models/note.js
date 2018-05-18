@@ -1,26 +1,25 @@
 'use strict';
 
 module.exports = function(Note) {
-
   Note.clear = () => ({
     note: {
-      Content: ''
+      Content: '',
     },
-    previousClear: new Date()
+    previousClear: new Date(),
   });
 
   Note.remoteMethod(
-        'clear', {
-          http: {
-            path: '/clear',
-            verb: 'post'
-          },
-          returns: [{
-            arg: 'note',
-            type: 'object'
-          }, {
-            arg: 'previousClear',
-            type: 'Date'
-          }]
-        });
+    'clear', {
+      http: {
+        path: '/clear',
+        verb: 'post',
+      },
+      returns: [{
+        arg: 'note',
+        type: 'object',
+      }, {
+        arg: 'previousClear',
+        type: 'Date',
+      }],
+    });
 };

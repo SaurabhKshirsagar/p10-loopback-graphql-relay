@@ -1,5 +1,5 @@
 'use strict';
 
 module.exports = function enableAuthentication(server) {
-  server.enableAuth({ datasource: 'db' });
+  server.enableAuth({datasource: 'db'});
 };

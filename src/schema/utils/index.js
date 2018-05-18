@@ -1,10 +1,10 @@
 'use strict';
 
 const _ = require('lodash');
-const { connectionArgs } = require('graphql-relay');
+const {connectionArgs} = require('graphql-relay');
 
-const { getType, getConnection } = require('../../types/type');
-const { SCALARS } = require('../../types/generateTypeDefs');
+const {getType, getConnection} = require('../../types/type');
+const {SCALARS} = require('../../types/generateTypeDefs');
 
 const exchangeTypes = {
   any: 'JSON',
@@ -14,7 +14,7 @@ const exchangeTypes = {
   boolean: 'Boolean',
   Object: 'JSON',
   object: 'JSON',
-  PersistedModel: 'JSON'
+  PersistedModel: 'JSON',
 };
 
 /**
@@ -23,7 +23,6 @@ const exchangeTypes = {
  * @param {*} allowedVerbs
  */
 function isRemoteMethodAllowed(method, allowedVerbs) {
-
   let httpArray = method.http;
 
   if (!_.isArray(method.http)) {
@@ -31,7 +30,6 @@ function isRemoteMethodAllowed(method, allowedVerbs) {
   }
 
   const results = httpArray.map((item) => {
-
     const verb = item.verb;
 
     if (allowedVerbs && !_.includes(allowedVerbs, verb)) {
@@ -64,7 +62,7 @@ function getRemoteMethodInput(method, isConnection = false) {
     }
     if (param.arg) {
       acceptingParams[param.arg] = {
-        type: getType(exchangeTypes[paramType] || paramType)
+        type: getType(exchangeTypes[paramType] || paramType),
       };
     }
   });
@@ -77,24 +75,6 @@ function getRemoteMethodInput(method, isConnection = false) {
  * @param {*} method
  */
 function getRemoteMethodOutput(method) {
-
-  // let returnType = 'JSON';
-
-  // if (method.returns && method.returns[0]) {
-  //   if (!SCALARS[method.returns[0].type] && typeof method.returns[0].type !== 'object') {
-  //     returnType = `${method.returns[0].type}`;
-  //   } else {
-  //     returnType = `${_.upperFirst(method.returns[0].type)}`;
-  //     if (typeof method.returns[0].type === 'object') {
-  //       returnType = 'JSON';
-  //     }
-  //   }
-  // }
-
-  // const type = exchangeTypes[returnType] || returnType;
-
-  // return getType(type) || getType('JSON');
-
   let returnType = 'JSON';
   let list = false;
 
@@ -118,7 +98,7 @@ function getRemoteMethodOutput(method) {
 
   return {
     type,
-    list
+    list,
   };
 }
 
@@ -136,5 +116,5 @@ module.exports = {
   isRemoteMethodAllowed,
   getRemoteMethodInput,
   getRemoteMethodOutput,
-  getRemoteMethodQueryName
+  getRemoteMethodQueryName,
 };

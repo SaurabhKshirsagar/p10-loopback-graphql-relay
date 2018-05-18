@@ -2,14 +2,13 @@
 
 const expect = require('chai').expect;
 const chai = require('chai')
-    .use(require('chai-http'));
+  .use(require('chai-http'));
 const server = require('../server/server');
 const gql = require('graphql-tag');
 const Promise = require('bluebird');
 const cpx = require('cpx');
 
 describe('Relations', () => {
-
   before(() => Promise.fromCallback(cb => cpx.copy('./data.json', './data/', cb)));
 
   it('should query related entity with nested relational data', () => {
@@ -39,25 +38,25 @@ describe('Relations', () => {
                 }
               }`;
     return chai.request(server)
-              .post('/graphql')
-              .send({
-                query
-              })
-              .then((res) => {
-                expect(res).to.have.status(200);
-                expect(res.body.data.Customer.CustomerFind.edges.length).to.equal(2);
-              });
+      .post('/graphql')
+      .send({
+        query,
+      })
+      .then((res) => {
+        expect(res).to.have.status(200);
+        expect(res.body.data.Customer.CustomerFind.edges.length).to.equal(2);
+      });
   });
 
   describe('hasManyAndBelongsToMany', () => {
     it('Author should have two books', () => {
       const query = gql `
         {
-          node(id: "QXV0aG9yOjEw") {
+          node(id: "QXV0aG9yOjM=") {
             ... on Author {
               id
-              first_name
-              last_name
+              firstName
+              lastName
               books(last: 1) {
                 totalCount
                 pageInfo {
@@ -78,30 +77,28 @@ describe('Relations', () => {
           }
         }`;
       return chai.request(server)
-                .post('/graphql')
-                .send({
-                  query
-                })
-                .then((res) => {
-                  expect(res).to.have.status(200);
-                  const result = res.body.data;
-                  expect(result.node.first_name).to.equal('Cool');
-                  expect(result.node.books.totalCount).to.equal(2);
-                  expect(result.node.books.edges.length).to.equal(1);
-                  expect(result.node.books.edges[0].node.name).to.equal('Lame Book');
-                });
+        .post('/graphql')
+        .send({
+          query,
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          const result = res.body.data;
+          expect(result.node.firstName).to.equal('Virginia');
+          expect(result.node.books.totalCount).to.equal(2);
+        });
     });
   });
 
   describe('hasMany', () => {
-    it('should have one author and two notes', () => {
+    it('should have one author and more than two notes', () => {
       const query = gql `
         {
           Author {
             AuthorFindById(id: 3) {
               id
-              first_name
-              last_name
+              firstName
+              lastName
               notes {
                 edges {
                   node {
@@ -114,16 +111,16 @@ describe('Relations', () => {
           }
         }`;
       return chai.request(server)
-                .post('/graphql')
-                .send({
-                  query
-                })
-                .then((res) => {
-                  expect(res).to.have.status(200);
-                  const result = res.body.data;
-                  expect(result.Author.AuthorFindById.first_name).to.equal('Virginia');
-                  expect(result.Author.AuthorFindById.notes.edges.length).to.equal(2);
-                });
+        .post('/graphql')
+        .send({
+          query,
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          const result = res.body.data;
+          expect(result.Author.AuthorFindById.firstName).to.equal('Virginia');
+          expect(result.Author.AuthorFindById.notes.edges.length).to.be.above(4);
+        });
     });
   });
 
@@ -131,29 +128,28 @@ describe('Relations', () => {
     it('should have one author and two friendIds', () => {
       const query = gql `
         {
-          node(id: "QXV0aG9yOjg=") {
+          node(id: "QXV0aG9yOjM=") {
             ... on Author {
               id
-              first_name
-              last_name
+              firstName
+              lastName
               friendIds
             }
           }
         }`;
       return chai.request(server)
-                .post('/graphql')
-                .send({
-                  query
-                })
-                .then((res) => {
-                  expect(res).to.have.status(200);
-                  const result = res.body.data;
-                  expect(result.node.first_name).to.equal('Jane');
-                  expect(result.node.friendIds.length).to.equal(2);
-                });
+        .post('/graphql')
+        .send({
+          query,
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          const result = res.body.data;
+          expect(result.node.firstName).to.equal('Virginia');
+          expect(result.node.friendIds.length).to.equal(2);
+        });
     });
   });
-
 
   describe('embedsMany', () => {
     it('should have one book and two links', () => {
@@ -170,16 +166,16 @@ describe('Relations', () => {
           }
         }`;
       return chai.request(server)
-                .post('/graphql')
-                .send({
-                  query
-                })
-                .then((res) => {
-                  expect(res).to.have.status(200);
-                  const result = res.body.data;
-                  expect(result.Book.BookFindById.name).to.equal('Book 1');
-                  expect(result.Book.BookFindById.links.length).to.equal(2);
-                });
+        .post('/graphql')
+        .send({
+          query,
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          const result = res.body.data;
+          expect(result.Book.BookFindById.name).to.equal('Book 1');
+          expect(result.Book.BookFindById.links.length).to.equal(2);
+        });
     });
   });
 
@@ -201,15 +197,15 @@ describe('Relations', () => {
           }
         }`;
       return chai.request(server)
-                .post('/graphql')
-                .send({
-                  query
-                })
-                .then((res) => {
-                  expect(res).to.have.status(200);
-                  const result = res.body.data;
-                  expect(result.node.billingAddress.zipCode).to.equal('95131');
-                });
+        .post('/graphql')
+        .send({
+          query,
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          const result = res.body.data;
+          expect(result.node.billingAddress.zipCode).to.equal('95131');
+        });
     });
   });
 
@@ -223,26 +219,25 @@ describe('Relations', () => {
               title
               author {
                 id
-                first_name
-                last_name
+                firstName
+                lastName
               }
             }
           }
         }`;
       return chai.request(server)
-                .post('/graphql')
-                .send({
-                  query
-                })
-                .then((res) => {
-                  expect(res).to.have.status(200);
-                  const result = res.body.data;
-                  expect(result.node.title).to.equal('Who is Afraid');
-                  expect(result.node.author.first_name).to.equal('Virginia');
-                });
+        .post('/graphql')
+        .send({
+          query,
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          const result = res.body.data;
+          expect(result.node.title).to.equal('Who is Afraid');
+          expect(result.node.author.firstName).to.equal('Virginia');
+        });
     });
   });
-
 
   describe('hasOne', () => {
     it('should have orders with its customer', () => {
@@ -260,15 +255,15 @@ describe('Relations', () => {
           }
         }`;
       return chai.request(server)
-                .post('/graphql')
-                .send({
-                  query
-                })
-                .then((res) => {
-                  expect(res).to.have.status(200);
-                  const result = res.body.data;
-                  expect(result.Order.OrderFindById.customer.name).to.equal('Customer A');
-                });
+        .post('/graphql')
+        .send({
+          query,
+        })
+        .then((res) => {
+          expect(res).to.have.status(200);
+          const result = res.body.data;
+          expect(result.Order.OrderFindById.customer.name).to.equal('Customer A');
+        });
     });
   });
 });

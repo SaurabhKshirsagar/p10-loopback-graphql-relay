@@ -1,23 +1,24 @@
+'use strict';
 
 const _ = require('lodash');
 
 const {
-	GraphQLObjectType,
+  GraphQLObjectType,
   GraphQLInputObjectType,
-	GraphQLEnumType,
-	GraphQLList,
-  GraphQLNonNull
+  GraphQLEnumType,
+  GraphQLList,
+  GraphQLNonNull,
 } = require('graphql');
 
 const {
-	globalIdField,
-	fromGlobalId,
-	nodeDefinitions: relayNodeDefinitions,
+  globalIdField,
+  fromGlobalId,
+  nodeDefinitions: relayNodeDefinitions,
 } = require('graphql-relay');
 
 // const type = require('./type');
-let { getType, getConnection } = require('./type');
-const { generateTypeDefs } = require('./generateTypeDefs');
+let {getType, getConnection} = require('./type');
+const {generateTypeDefs} = require('./generateTypeDefs');
 
 /**
  * Singleton Objects
@@ -43,7 +44,6 @@ function init(_models) {
  * @param {*} type
  */
 const processIdField = (name, type) => {
-
   if (!models[name] || !models[name].getIdName) {
     return;
   }
@@ -79,7 +79,7 @@ function generateFieldArgs(field) {
       return;
     }
 
-    args[argName] = { type: (arg.required === true) ? new GraphQLNonNull(getType(arg.type)) : getType(arg.type) };
+    args[argName] = {type: (arg.required === true) ? new GraphQLNonNull(getType(arg.type)) : getType(arg.type)};
   });
 
   return args;
@@ -92,7 +92,6 @@ function generateTypeFields(def) {
   const fields = {};
 
   _.forEach(def.meta.fields, (field, fieldName) => {
-
     field = _.clone(field);
 
     if (field.meta.hidden === true) {
@@ -160,7 +159,6 @@ function generateType(name, def) {
   processIdField(name, def);
 
   if (def.meta.category === 'TYPE') {
-
     def.fields = () => generateTypeFields(def);
 
     if (def.meta.input === true) {
@@ -170,7 +168,7 @@ function generateType(name, def) {
     return new GraphQLObjectType(def);
   } else if (def.category === 'ENUM') {
     const values = {};
-    _.forEach(def.values, (val) => { values[val] = { value: val }; });
+    _.forEach(def.values, (val) => { values[val] = {value: val}; });
     def.values = values;
 
     return new GraphQLEnumType(def);
@@ -183,8 +181,8 @@ function generateType(name, def) {
  */
 function generateNodeDefinitions(models) {
   nodeDefinitions = relayNodeDefinitions(
-    (globalId, context, { rootValue }) => {
-      const { type, id } = fromGlobalId(globalId);
+    (globalId, context, {rootValue}) => {
+      const {type, id} = fromGlobalId(globalId);
       return models[type].findById(id).then((obj) => {
         obj.__typename = type;
         return Promise.resolve(obj);
@@ -204,5 +202,5 @@ function getNodeDefinitions() {
 module.exports = {
   init,
   generateType,
-  getNodeDefinitions
+  getNodeDefinitions,
 };

@@ -1,6 +1,8 @@
-const { GraphQLScalarType } = require('graphql');
-const { GraphQLError } = require('graphql/error');
-const { Kind } = require('graphql/language');
+'use strict';
+
+const {GraphQLScalarType} = require('graphql');
+const {GraphQLError} = require('graphql/error');
+const {Kind} = require('graphql/language');
 
 module.exports = new GraphQLScalarType({
   name: 'DateTime',
@@ -33,5 +35,5 @@ module.exports = new GraphQLScalarType({
       throw new GraphQLError('Query error: Invalid date format, only accepts: YYYY-MM-DDTHH:MM:SS.SSSZ', [ast]);
     }
     return result;
-  }
+  },
 });

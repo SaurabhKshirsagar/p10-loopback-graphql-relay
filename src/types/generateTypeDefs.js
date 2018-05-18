@@ -1,12 +1,14 @@
+'use strict';
+
 const _ = require('lodash');
 
 const {
-  connectionArgs
+  connectionArgs,
 } = require('graphql-relay');
 
 const GeoPointTypeDefs = require('./GeoPoint');
-const { findRelatedOne, findRelatedMany } = require('../db');
-const { connectionFromPromisedArray } = require('../db/resolveConnection');
+const {findRelatedOne, findRelatedMany} = require('../db');
+const {connectionFromPromisedArray} = require('../db/resolveConnection');
 
 /** * Loopback Types - GraphQL types
         any - JSON
@@ -19,7 +21,7 @@ const { connectionFromPromisedArray } = require('../db/resolveConnection');
         Number = float
         Object = JSON (custom scalar)
         String - string
-    ***/
+    ** */
 
 let types = {};
 
@@ -34,7 +36,7 @@ const SCALARS = {
   now: 'Date',
   guid: 'ID',
   uuid: 'ID',
-  uuidv4: 'ID'
+  uuidv4: 'ID',
 };
 
 function getScalar(type) {
@@ -54,7 +56,6 @@ function toTypes(union) {
  * @param {*} isInputType
  */
 function mapProperty(model, property, modelName, propertyName, isInputType = false) {
-
   // If property is deprecated, ignore it.
   if (property.deprecated) {
     return;
@@ -65,8 +66,8 @@ function mapProperty(model, property, modelName, propertyName, isInputType = fal
     generated: false,
     meta: {
       required: property.required,
-      hidden: model.definition.settings.hidden && model.definition.settings.hidden.indexOf(propertyName) !== -1
-    }
+      hidden: model.definition.settings.hidden && model.definition.settings.hidden.indexOf(propertyName) !== -1,
+    },
   };
   const currentProperty = types[modelName].meta.fields[propertyName];
 
@@ -113,8 +114,8 @@ function mapProperty(model, property, modelName, propertyName, isInputType = fal
         name: typeName,
         values: property.enum,
         meta: {
-          category: 'ENUM'
-        }
+          category: 'ENUM',
+        },
       };
       currentProperty.type = typeName;
     }
@@ -131,9 +132,9 @@ function mapProperty(model, property, modelName, propertyName, isInputType = fal
         generated: false,
         name: typeName,
         meta: {
-          category: 'UNION'
+          category: 'UNION',
         },
-        values: toTypes(union)
+        values: toTypes(union),
       };
     } else if (propertyType.settings && propertyType.settings.anonymous && propertyType.definition) {
       currentProperty.meta.type = typeName;
@@ -143,8 +144,8 @@ function mapProperty(model, property, modelName, propertyName, isInputType = fal
         meta: {
           category: 'TYPE',
           input: isInputType,
-          fields: {}
-        }
+          fields: {},
+        },
       }; // creating a new type
       _.forEach(propertyType.definition.properties, (p, key) => {
         mapProperty(propertyType, p, typeName, key, isInputType);
@@ -190,11 +191,11 @@ function mapRelation(rel, modelName, relName) {
       args: Object.assign({
         where: {
           generated: false,
-          type: 'JSON'
+          type: 'JSON',
         },
         order: {
           generated: false,
-          type: 'JSON'
+          type: 'JSON',
         },
       }, connectionArgs),
     },
@@ -204,7 +205,7 @@ function mapRelation(rel, modelName, relName) {
       }
 
       return findRelatedOne(rel, obj, args, context);
-    }
+    },
   };
 }
 
@@ -218,8 +219,8 @@ function mapType(model) {
     name: model.modelName,
     meta: {
       category: 'TYPE',
-      fields: {}
-    }
+      fields: {},
+    },
   };
 
   _.forEach(model.definition.properties, (property, key) => {
@@ -244,8 +245,8 @@ function mapInputType(model) {
     meta: {
       category: 'TYPE',
       input: true,
-      fields: {}
-    }
+      fields: {},
+    },
   };
 
   _.forEach(model.definition.properties, (property, key) => {
@@ -272,7 +273,6 @@ function getCustomTypeDefs() {
  * building all models types & relationships
  */
 function generateTypeDefs(models) {
-
   types = Object.assign({}, types, getCustomTypeDefs());
 
   _.forEach(models, (model) => {
@@ -287,5 +287,5 @@ module.exports = {
   getTypeDef,
   getTypeDefs,
   generateTypeDefs,
-  SCALARS
+  SCALARS,
 };

@@ -3,20 +3,20 @@
 const _ = require('lodash');
 
 const {
-	GraphQLID,
-	GraphQLString,
-	GraphQLBoolean,
-	GraphQLFloat,
-	GraphQLInt
+  GraphQLID,
+  GraphQLString,
+  GraphQLBoolean,
+  GraphQLFloat,
+  GraphQLInt,
 } = require('graphql');
 
-const { connectionDefinitions } = require('graphql-relay');
+const {connectionDefinitions} = require('graphql-relay');
 
 const CustomGraphQLDateType = require('./Date');
 const GraphQLJSON = require('graphql-type-json');
 
-const { getTypeDef } = require('./generateTypeDefs');
-const { init, generateType, getNodeDefinitions } = require('./generateType');
+const {getTypeDef} = require('./generateTypeDefs');
+const {init, generateType, getNodeDefinitions} = require('./generateType');
 
 /**
  * Singleton Placeholders
@@ -24,9 +24,7 @@ const { init, generateType, getNodeDefinitions } = require('./generateType');
 const types = {};
 const connectionTypes = {};
 
-
 const getScalar = (name) => {
-
   switch (name) {
     case 'ID':
       return GraphQLID;
@@ -87,7 +85,6 @@ const getConnection = (name) => {
  * @param {*} name
  */
 const getType = (name) => {
-
   if (types[name]) {
     return types[name];
   }
@@ -97,7 +94,6 @@ const getType = (name) => {
   }
 
   switch (name) {
-
     case 'node':
       types[name] = getNodeDefinitions().nodeField;
       return types[name];
@@ -112,9 +108,7 @@ const getType = (name) => {
   }
 };
 
-
 function buildTypes(models) {
-
   init(models);
 
   _.forEach(models, (model) =>  {

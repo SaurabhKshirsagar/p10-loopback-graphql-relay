@@ -8,7 +8,6 @@ function connectionFromPromisedArray(dataPromise, args, model) {
 }
 
 function connectionFromArray(obj, args, model) {
-
   const idName = (model && model.getIdName()) ? model.getIdName() : 'id';
 
   const res = {
@@ -16,17 +15,17 @@ function connectionFromArray(obj, args, model) {
 
     edges: _.map(obj.list, node => ({
       cursor: utils.idToCursor(node[idName]),
-      node
+      node,
     })),
 
     list: obj.list,
 
-    pageInfo:  {
+    pageInfo: {
       startCursor: null,
       endCursor: null,
       hasPreviousPage: false,
-      hasNextPage: false
-    }
+      hasNextPage: false,
+    },
   };
 
   if (obj.count > 0) {
@@ -43,5 +42,5 @@ function connectionFromArray(obj, args, model) {
 
 module.exports = {
   connectionFromArray,
-  connectionFromPromisedArray
+  connectionFromPromisedArray,
 };

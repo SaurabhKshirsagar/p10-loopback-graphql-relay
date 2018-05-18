@@ -1,8 +1,12 @@
+/**
+ * @deprecated since version 0.10.1
+ */
+'use strict';
+
 // const PubSub = require('graphql-subscriptions').PubSub;
 const _ = require('lodash');
 
 class PubSub {
-
   constructor() {
     this.subscriptions = {};
     this.subIdCounter = 0;
@@ -16,41 +20,36 @@ class PubSub {
   }
 
   subscribe(triggerName, onMessage, options) {
-
     const me = this;
 
     // Subscription ID
     const subId = this.getSubscriptionId(options.clientSubscriptionId || _.random(1, 99999));
 
     // Check Type
-    const { model } = options;
+    const {model} = options;
 
     if (_.isNil(model)) {
       return Promise.reject(new Error('No related model found for this subscription'));
     }
 
-    const { create, update, remove: rmv, options: opts } = options;
+    const {create, update, remove: rmv, options: opts} = options;
 
     // Login
-    return Promise.resolve().then(() => new Promise((resolve, reject) => {
-      model.checkAccess(options.context.accessToken, null, model.sharedClass.methods().filter(model=>model["name"]=="createChangeStream")[0], null, (err, allowed) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(allowed);
-      });
-    })).then((result) => {
+    // return Promise.resolve().then(() => new Promise((resolve, reject) => {
+    //   model.checkAccess(context.accessToken, null, model.createChangeStream, null, (err, allowed) => {
+    //     if (err) {
+    //       reject(err);
+    //     }
+    //     resolve(allowed);
+    //   });
+    // })).then((result) => {
 
-    if(!result){
-      return Promise.reject(new Error('Access Denied'));
-    }
-      // Stream
+    // Stream
     model.createChangeStream(opts, (err, stream) => {
       // changes.pipe(es.stringify()).pipe(process.stdout);
 
       // Listeners
       stream.on('data', (data) => {
-
         switch (data.type) {
           case 'create':
             if (create) {
@@ -82,7 +81,7 @@ class PubSub {
     });
 
     return Promise.resolve(subId);
-     });
+    // });
   }
 
   unsubscribe(subId) {
@@ -102,7 +101,7 @@ class PubSub {
     const payload = {
       subscriptionId: subId,
       event,
-      object
+      object,
     };
 
     try {
@@ -114,13 +113,11 @@ class PubSub {
   }
 
   onUpdateMessage(subId, event, object, model) {
-
     model.findById(object.target).then((obj) => {
-
       const payload = {
         subscriptionId: subId,
         event,
-        object: { data: obj }
+        object: {data: obj},
       };
 
       try {
@@ -130,7 +127,6 @@ class PubSub {
       // logger.info(new Error('An error occured while try to broadcast subscription.'));
       }
     });
-
   }
 }
 

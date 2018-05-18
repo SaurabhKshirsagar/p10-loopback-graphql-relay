@@ -10,7 +10,7 @@ module.exports = function buildFilter(model, args) {
   const idName = (model.getIdName && model.getIdName()) ? model.getIdName() : 'id';
 
   const filter = {
-    where: args.where || {}
+    where: args.where || {},
   };
 
   sortFilter(filter, args.order, args.before, idName);
@@ -32,7 +32,6 @@ function sortFilter(filter, order, before, idName) {
 }
 
 function limitFilter(filter, before, after, order, idName) {
-
   const begin = utils.getId(after);
   const end = utils.getId(before);
 
@@ -48,8 +47,7 @@ function limitFilter(filter, before, after, order, idName) {
 
 function applyPagination(filter, first, last, count) {
   if (first || last) {
-    let limit;
-    let skip;
+    let limit, skip;
 
     if (first && count > first) {
       limit = first;

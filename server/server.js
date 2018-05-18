@@ -8,11 +8,11 @@ module.exports = app;
 
 app.use(loopback.token({
   model: app.models.accessToken,
-  currentUserLiteral: 'me'
+  currentUserLiteral: 'me',
 }));
 
 app.start = function() {
-    // start the web server
+  // start the web server
   return app.listen(() => {
     app.emit('started');
     const baseUrl = app.get('url').replace(/\/$/, '');
@@ -29,6 +29,6 @@ app.start = function() {
 boot(app, __dirname, (err) => {
   if (err) { throw err; }
 
-    // start the server if `$ node server.js`
+  // start the server if `$ node server.js`
   if (require.main === module)        { app.start(); }
 });

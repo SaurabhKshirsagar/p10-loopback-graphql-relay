@@ -7,15 +7,15 @@
     "validateUpsert": true
   },
   "properties": {
-    "first_name": {
+    "firstName": {
       "type": "string",
       "required": true
     },
-    "last_name": {
+    "lastName": {
       "type": "string",
       "required": true
     },
-    "birth_date": {
+    "birthDate": {
       "type": "date",
       "required": true
     },
@@ -50,5 +50,5 @@
     }
   },
   "acls": [],
-  "methods": {}
+  "methods": []
 }

@@ -3,13 +3,13 @@
 const _ = require('lodash');
 
 const {
-	connectionArgs
+  connectionArgs,
 } = require('graphql-relay');
 
-const { GraphQLObjectType } = require('graphql');
-const { getType, getConnection } = require('../../types/type');
-const { findAllRelated } = require('../../db');
-const { connectionFromPromisedArray } = require('../../db/resolveConnection');
+const {GraphQLObjectType} = require('graphql');
+const {getType, getConnection} = require('../../types/type');
+const {findAllRelated} = require('../../db');
+const {connectionFromPromisedArray} = require('../../db/resolveConnection');
 
 /**
  * Adds fields of all relationed models
@@ -19,26 +19,24 @@ function getRelatedModelFields(User) {
   const fields = {};
 
   _.forEach(User.relations, (relation) => {
-
     const model = relation.modelTo;
 
     fields[_.lowerFirst(relation.name)] = {
       args: Object.assign({
         where: {
-          type: getType('JSON')
+          type: getType('JSON'),
         },
         order: {
-          type: getType('JSON')
+          type: getType('JSON'),
         },
       }, connectionArgs),
       type: getConnection(model.modelName),
       resolve: (obj, args, context) => {
-
-        if (!context.req.accessToken) return null;
+        if (!context.req || !context.req.accessToken) return null;
 
         return findUserFromAccessToken(context.req.accessToken, User)
-					.then(user => connectionFromPromisedArray(findAllRelated(User, user, relation.name, args, context), args, model));
-      }
+          .then(user => connectionFromPromisedArray(findAllRelated(User, user, relation.name, args, context), args, model));
+      },
     };
   });
 
@@ -51,7 +49,6 @@ function getRelatedModelFields(User) {
  * @param {*} UserModel
  */
 function findUserFromAccessToken(accessToken, UserModel) {
-
   if (!accessToken) return null;
 
   return UserModel.findById(accessToken.userId).then((user) => {
@@ -65,17 +62,15 @@ function findUserFromAccessToken(accessToken, UserModel) {
  * @param {*} User
  */
 function getMeField(User) {
-
   return {
     me: {
       type: getType(User.modelName),
-      resolve: (obj, args, { app, req }) => {
-
+      resolve: (obj, args, {app, req}) => {
         if (!req.accessToken) return null;
 
         return findUserFromAccessToken(req.accessToken, User);
-      }
-    }
+      },
+    },
   };
 }
 
@@ -84,11 +79,10 @@ function getMeField(User) {
  * @param {*} models
  */
 module.exports = function(models, options) {
-
   const opts = Object.assign({}, {
     AccessTokenModel: 'AccessToken',
     relation: 'user',
-    UserModel: 'User'
+    UserModel: 'User',
   }, options.viewer || {});
 
   const User = _.find(models, model => model.modelName === opts.UserModel);
@@ -100,10 +94,10 @@ module.exports = function(models, options) {
       description: 'Viewer',
       // interfaces: () => [nodeDefinitions.nodeInterface],
       fields: () => Object.assign({},
-          getMeField(User),
-          getRelatedModelFields(User)
-        )
-    })
+        getMeField(User),
+        getRelatedModelFields(User)
+      ),
+    }),
   };
 
   return Viewer;

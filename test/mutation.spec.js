@@ -1,10 +1,10 @@
+/* eslint-disable camelcase */
 'use strict';
 
 const Promise = require('bluebird');
 
 const expect = require('chai').expect;
-const chai = require('chai')
-    .use(require('chai-http'));
+const chai = require('chai').use(require('chai-http'));
 const server = require('../server/server');
 const cpx = require('cpx');
 
@@ -13,7 +13,11 @@ const gql = require('graphql-tag');
 
 describe('Mutations', () => {
 
-  before(() => Promise.fromCallback(cb => cpx.copy('./data.json', './data/', cb)));
+    var authorId = 123;
+
+    before(() => Promise.fromCallback(cb => cpx.copy('./data.json', './data/', cb)));
+    after(() => {
+    });
 
   it('should add a single entity', () => {
     const query = gql `
@@ -21,34 +25,34 @@ describe('Mutations', () => {
         Author {
           AuthorCreate(input: {data: $data}) {
             obj {
-              first_name
-              last_name
-              birth_date
+              firstName
+              lastName
+              birthDate
             }
           }
         }
       }`;
     const variables = {
       data: {
-        first_name: 'Unit Test',
-        last_name: 'Author',
-        birth_date: new Date()
-      }
+        firstName: 'Unit Test',
+        lastName: 'Author',
+        birthDate: new Date(),
+      },
     };
 
     return chai.request(server)
-            .post('/graphql')
-            .send({
-              query,
-              variables
-            })
-            .then((res) => {
-              expect(res).to.have.status(200);
-              const result = res.body.data;
-              expect(result.Author.AuthorCreate.obj.first_name).to.equal(variables.data.first_name);
-              expect(result.Author.AuthorCreate.obj.last_name).to.equal(variables.data.last_name);
-              // expect(Date.parse(result.Author.AuthorCreate.obj.birth_date)).to.equal(variables.data.birth_date);
-            });
+      .post('/graphql')
+      .send({
+        query,
+        variables,
+      })
+      .then((res) => {
+        expect(res).to.have.status(200);
+        const result = res.body.data;
+        expect(result.Author.AuthorCreate.obj.firstName).to.equal(variables.data.firstName);
+        expect(result.Author.AuthorCreate.obj.lastName).to.equal(variables.data.lastName);
+        authorId = result.Author.AuthorCreate.obj.id;
+      });
   });
 
   it('should add a single entity with sub type', () => {
@@ -64,8 +68,8 @@ describe('Mutations', () => {
                 body
               }
               author {
-                first_name
-                last_name
+                firstName
+                lastName
               }
             }
           }
@@ -74,75 +78,105 @@ describe('Mutations', () => {
     const variables = {
       data: {
         title: 'Heckelbery Finn',
-        authorId: 8,
+        authorId: 3,
         content: {
           body,
-          footer: 'The end'
-        }
-      }
+          footer: 'The end',
+        },
+      },
     };
 
     return chai.request(server)
-            .post('/graphql')
-            .send({
-              query,
-              variables
-            })
-            .then((res) => {
-              expect(res).to.have.status(200);
-              const result = res.body.data;
-              expect(result.Note.NoteCreate.obj.content.body).to.equal(body);
-              expect(result.Note.NoteCreate.obj.author.first_name).to.equal('Jane');
-              expect(result.Note.NoteCreate.obj.author.last_name).to.equal('Austin');
-            });
+      .post('/graphql')
+      .send({
+        query,
+        variables,
+      })
+      .then((res) => {
+        expect(res).to.have.status(200);
+        const result = res.body.data;
+        expect(result.Note.NoteCreate.obj.content.body).to.equal(body);
+        expect(result.Note.NoteCreate.obj.author.firstName).to.equal('Virginia');
+        expect(result.Note.NoteCreate.obj.author.lastName).to.equal('Wolf');
+      });
   });
 
   it('should delete a single entity', () => {
     const query = gql `
-      mutation delete($id: ID!) {
+      mutation delete($input: AuthorDeleteByIdInput!) {
         Author {
-          AuthorDeleteById(input: {id: $id}) {
+          AuthorDeleteById(input: $input) {
             clientMutationId
           }
         }
       }`;
     const variables = {
-      id: 4
+      input: {id: '1'},
     };
 
     return chai.request(server)
-            .post('/graphql')
-            .send({
-              query,
-              variables
-            })
-            .then((res) => {
-              expect(res).to.have.status(200);
-            });
+      .post('/graphql')
+      .send({
+        query,
+        variables,
+      })
+      .then((res) => {
+        expect(res).to.have.status(200);
+      }).catch((err) =>{
+        throw err;
+      });
   });
 
   it('should login and return an accessToken', () => {
     const query = gql `
-      mutation login {
-        User {
-          UserLogin(input:{
-            credentials: {
-              username: "naveenmeher", 
-              password: "welcome"
-            }
-          }) {
+      mutation login ($input: AccountLoginInput!){
+        Account {
+          AccountLogin(input: $input) {
             obj
           }
         }
       }`;
+    const variables = {
+      input: {credentials: {username: 'aatif', password: '123'}},
+    };
+
     return chai.request(server)
-            .post('/graphql')
-            .send({
-              query
-            })
-            .then((res) => {
-              expect(res).to.have.status(200);
-              expect(res).to.have.deep.property('body.data.User.UserLogin.obj.id');
-            });
+      .post('/graphql')
+      .send({
+        query,
+        variables,
+      })
+      .then((res) => {
+        expect(res).to.have.status(200);
+        expect(res.body.data.Account.AccountLogin.obj).to.have.property('id');
+      });
+  });
+
+  it('should not login and return an error', () => {
+    const query = gql `
+    mutation login ($input: AccountLoginInput!){
+      Account {
+        AccountLogin(input: $input) {
+          obj
+        }
+      }
+    }`;
+
+    const variables = {
+      input: {credentials: {username: 'aatif', password: 'wrong'}},
+    };
+
+    return chai.request(server)
+      .post('/graphql')
+      .send({
+        query,
+        variables,
+      })
+      .then((res) => {
+        expect(res).to.have.status(200);
+        expect(res.body).to.have.property('errors');
+      }).catch((err) => {
+        console.log(err);
+      });
   });
 });

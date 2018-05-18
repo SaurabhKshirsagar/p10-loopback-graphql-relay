@@ -1,16 +1,14 @@
 'use strict';
 
 const _ = require('lodash');
-const { GraphQLObjectType } = require('graphql');
+const {GraphQLObjectType} = require('graphql');
 
 const getRemoteMethods = require('./getRemoteMethodMutations');
 
 module.exports = function(models) {
-
   const modelFields = {};
   _.forEach(models, (model) => {
-
-    const fields = Object.assign({}, getRemoteMethods(model) );
+    const fields = Object.assign({}, getRemoteMethods(model));
 
     if (_.size(fields) === 0) {
       return;
@@ -21,14 +19,13 @@ module.exports = function(models) {
       type: new GraphQLObjectType({
         name: `${model.modelName}Mutations`,
         description: model.modelName,
-        fields
-      })
+        fields,
+      }),
     };
-
   });
 
   return new GraphQLObjectType({
     name: 'Mutation',
-    fields: modelFields
+    fields: modelFields,
   });
 };
